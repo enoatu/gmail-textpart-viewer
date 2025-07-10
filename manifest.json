@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Gmail Text Part Viewer",
+  "version": "1.0",
+  "description": "GmailでメールのテキストパートとHTMLパートを切り替えて表示",
+  "permissions": [
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://mail.google.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["src/content.js", "src/raw-content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  }
+}
