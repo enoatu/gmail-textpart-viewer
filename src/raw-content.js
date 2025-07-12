@@ -7,7 +7,7 @@ console.log('[Gmail Text Part Viewer] Page title:', document.title);
 function decodeQuotedPrintable(str) {
   // ソフトラインブレークを削除
   str = str.replace(/=\r?\n/g, '');
-  
+
   // =XX形式を一旦バイト配列に変換
   const bytes = [];
   let i = 0;
@@ -24,7 +24,7 @@ function decodeQuotedPrintable(str) {
     bytes.push(str.charCodeAt(i));
     i++;
   }
-  
+
   // バイト配列をUTF-8としてデコード
   try {
     return new TextDecoder('utf-8').decode(new Uint8Array(bytes));
@@ -54,27 +54,27 @@ function decodeBase64(str) {
 function parseMimeParts(rawText) {
   const parts = [];
   const boundaryMatch = rawText.match(/boundary="?([^"\s]+)"?/i);
-  
+
   if (!boundaryMatch) {
     return [{ content: rawText, headers: {} }];
   }
-  
+
   const boundary = boundaryMatch[1];
   const sections = rawText.split(new RegExp(`--${boundary.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
-  
+
   for (const section of sections) {
     if (section.trim() === '' || section.trim() === '--') continue;
-    
+
     const headerEndIndex = section.search(/\r?\n\r?\n/);
     if (headerEndIndex === -1) continue;
-    
+
     const headerSection = section.substring(0, headerEndIndex);
     const content = section.substring(headerEndIndex).trim();
-    
+
     const headers = {};
     const headerLines = headerSection.split(/\r?\n/);
     let currentHeader = '';
-    
+
     for (const line of headerLines) {
       if (line.match(/^\s/) && currentHeader) {
         // 継続行
@@ -87,10 +87,10 @@ function parseMimeParts(rawText) {
         }
       }
     }
-    
+
     parts.push({ headers, content });
   }
-  
+
   return parts;
 }
 
@@ -98,13 +98,13 @@ function parseMimeParts(rawText) {
 function extractAndDecodeTextPart(rawText) {
   const parts = parseMimeParts(rawText);
   const textParts = [];
-  
+
   for (const part of parts) {
     const contentType = part.headers['content-type'] || '';
-    
+
     if (contentType.includes('text/plain')) {
       let decodedContent = part.content;
-      
+
       // Content-Transfer-Encodingをチェック
       const encoding = part.headers['content-transfer-encoding'];
       if (encoding) {
@@ -114,13 +114,13 @@ function extractAndDecodeTextPart(rawText) {
           decodedContent = decodeBase64(decodedContent);
         }
       }
-      
+
       // 文字コードを確認
       const charsetMatch = contentType.match(/charset=["']?([^"'\s;]+)/i);
       if (charsetMatch && charsetMatch[1].toLowerCase() !== 'utf-8') {
         console.log('Charset:', charsetMatch[1]);
       }
-      
+
       textParts.push({
         content: decodedContent,
         encoding: encoding || 'none',
@@ -128,7 +128,7 @@ function extractAndDecodeTextPart(rawText) {
       });
     }
   }
-  
+
   return textParts;
 }
 
@@ -151,7 +151,7 @@ function createUI() {
     z-index: 10000;
     font-family: sans-serif;
   `;
-  
+
   const header = document.createElement('div');
   header.style.cssText = `
     display: flex;
@@ -161,11 +161,11 @@ function createUI() {
     padding-bottom: 10px;
     border-bottom: 1px solid #eee;
   `;
-  
+
   const title = document.createElement('h3');
   title.textContent = 'Text Part Viewer';
   title.style.margin = '0';
-  
+
   const closeButton = document.createElement('button');
   closeButton.textContent = '×';
   closeButton.style.cssText = `
@@ -178,18 +178,18 @@ function createUI() {
     height: 30px;
   `;
   closeButton.onclick = () => container.remove();
-  
+
   header.appendChild(title);
   header.appendChild(closeButton);
   container.appendChild(header);
-  
+
   return container;
 }
 
 // Text Partを表示
 function displayTextParts(textParts) {
   const container = createUI();
-  
+
   if (textParts.length === 0) {
     const message = document.createElement('p');
     message.textContent = 'Text Partが見つかりませんでした。';
@@ -204,7 +204,7 @@ function displayTextParts(textParts) {
         background: #f5f5f5;
         border-radius: 4px;
       `;
-      
+
       const info = document.createElement('div');
       info.style.cssText = `
         font-size: 12px;
@@ -212,7 +212,7 @@ function displayTextParts(textParts) {
         margin-bottom: 10px;
       `;
       info.textContent = `Part ${index + 1} - Encoding: ${part.encoding}, Charset: ${part.charset}`;
-      
+
       const content = document.createElement('pre');
       content.style.cssText = `
         white-space: pre-wrap;
@@ -227,19 +227,19 @@ function displayTextParts(textParts) {
         line-height: 1.5;
       `;
       content.textContent = part.content;
-      
+
       partContainer.appendChild(info);
       partContainer.appendChild(content);
       container.appendChild(partContainer);
     });
   }
-  
+
   // 既存のビューアがあれば削除
   const existing = document.getElementById('text-part-viewer');
   if (existing) {
     existing.remove();
   }
-  
+
   document.body.appendChild(container);
 }
 
@@ -250,7 +250,7 @@ function addViewButton() {
     console.log('[Gmail Text Part Viewer] Button already exists');
     return;
   }
-  
+
   const button = document.createElement('button');
   button.id = 'text-part-viewer-button';
   button.textContent = 'View Text Part';
@@ -267,13 +267,13 @@ function addViewButton() {
     font-size: 14px;
     z-index: 10000;
   `;
-  
+
   button.onclick = () => {
     const rawText = document.body.textContent;
     const textParts = extractAndDecodeTextPart(rawText);
     displayTextParts(textParts);
   };
-  
+
   document.body.appendChild(button);
 }
 
@@ -293,13 +293,13 @@ function isRawMessagePage() {
 // ページが読み込まれたら実行
 function initialize() {
   console.log('[Gmail Text Part Viewer] Initializing...');
-  
+
   if (isRawMessagePage()) {
     console.log('[Gmail Text Part Viewer] Raw message page detected, adding view button');
     addViewButton();
-    
+
     // ページ内容の確認
-    console.log('[Gmail Text Part Viewer] Page content preview:', 
+    console.log('[Gmail Text Part Viewer] Page content preview:',
       document.body.textContent.substring(0, 200));
   } else {
     console.log('[Gmail Text Part Viewer] Not a raw message page, skipping');
