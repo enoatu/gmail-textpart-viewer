@@ -1,6 +1,6 @@
 # Gmail Text Part Viewer
 
-GmailでメールのテキストパートとHTMLパートを切り替えて表示するChrome拡張機能です。
+Gmailでメールのテキストパートを表示するChrome拡張機能です。
 
 <img width="1419" height="679" alt="スクリーンショット 2025-07-13 12 22 49" src="https://github.com/user-attachments/assets/5ac8194e-c18f-4a93-8b93-de6bdc94cfc1" />
 
@@ -24,7 +24,6 @@ GmailでメールのテキストパートとHTMLパートを切り替えて表�
 
 1. Gmailでメールを開き、「原文を表示」をクリック
 2. 拡張機能のアイコンをクリックしてポップアップを開く
-3. トグルスイッチでHTML/Text表示を切り替え
 
 ## ファイル構成
 
